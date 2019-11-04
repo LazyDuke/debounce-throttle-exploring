@@ -30,12 +30,13 @@ function debounce(func, wait) {
     }
 
     var realWait = remainingWait(time)
+    // 重新启动计时器
     timerId = startTimer(realWait)
 
     // 计算真正延迟触发的时间
     function remainingWait(time) {
-      var timeSinceLastCall = time - lastCallTime,
-        timeWaiting = wait - timeSinceLastCall
+      var timeSinceLastCall = time - lastCallTime, // debounced 上次触发到现在的经历的时间
+        timeWaiting = wait - timeSinceLastCall // 真正还需等待触发的时间
 
       return timeWaiting
     }
@@ -46,9 +47,9 @@ function debounce(func, wait) {
     var timeSinceLastCall = time - lastCallTime
 
     return (
-      lastCallTime === undefined ||
-      timeSinceLastCall >= wait ||
-      timeSinceLastCall < 0
+      lastCallTime === undefined || // 如果是第一次调用，则一定允许
+      timeSinceLastCall >= wait || // 等待时间超过设置的时间
+      timeSinceLastCall < 0 // 当前时刻早于上次事件触发时间，比如说调整了系统时间
     )
   }
 

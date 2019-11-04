@@ -60,14 +60,15 @@ function debounce(func, wait, options) {
     }
 
     var realwait = remainingWait(time)
+    // 重新启动计时器
     timerId = startTimer(realwait)
 
     // 计算真正延迟触发的时间
     function remainingWait(time) {
-      var timeSinceLastCall = time - lastCallTime,
-        timeSinceLastInvoke = time - lastInvokeTime,
-        timeWaiting = wait - timeSinceLastCall
-
+      var timeSinceLastCall = time - lastCallTime, // debounced 上次触发到现在的经历的时间
+        timeSinceLastInvoke = time - lastInvokeTime, // invokeFunc 上次触发到现在的经历的时间
+        timeWaiting = wait - timeSinceLastCall // 真正还需等待触发的时间
+      // 如果用户设置了最长等待时间，则需要取最小值
       return maxing
         ? nativeMin(timeWaiting, maxWait - timeSinceLastInvoke)
         : timeWaiting
@@ -76,14 +77,14 @@ function debounce(func, wait, options) {
 
   // 判断是否要调用 func
   function shouldInvoke(time) {
-    var timeSinceLastCall = time - lastCallTime,
-      timeSinceLastInvoke = time - lastInvokeTime
+    var timeSinceLastCall = time - lastCallTime, // debounced 上次触发到现在的经历的时间
+      timeSinceLastInvoke = time - lastInvokeTime // invokeFunc 上次触发到现在的经历的时间
 
     return (
-      lastCallTime === undefined ||
-      timeSinceLastCall >= wait ||
-      timeSinceLastCall < 0 ||
-      (maxing && timeSinceLastInvoke >= maxWait)
+      lastCallTime === undefined || // 如果是第一次调用，则一定允许
+      timeSinceLastCall >= wait || // 等待时间超过设置的时间
+      timeSinceLastCall < 0 || // 当前时刻早于上次事件触发时间，比如说调整了系统时间
+      (maxing && timeSinceLastInvoke >= maxWait) // 等待时间超过最大等待时间
     )
   }
 
@@ -93,7 +94,7 @@ function debounce(func, wait, options) {
       thisArg = lastThis
 
     lastArgs = lastThis = undefined
-    lastInvokeTime = time
+    lastInvokeTime = time // 更新 lastInvokeTime
 
     result = func.apply(thisArg, args)
     return result
@@ -101,9 +102,11 @@ function debounce(func, wait, options) {
 
   // 前置触发 func 的边界函数
   function leadingEdge(time) {
+    // Reset any `maxWait` timer.
     lastInvokeTime = time
+    // Start the timer for the trailing edge.
     timerId = startTimer(wait)
-
+    // Invoke the leading edge.
     return leading ? invokeFunc(time) : result
   }
 
@@ -111,6 +114,9 @@ function debounce(func, wait, options) {
   function trailingEdge(time) {
     timerId = undefined
 
+    // 只有当事件至少发生过一次且配置了末端触发才调用真正的事件处理程序，
+    // 意思是如果程序设置了末端触发，且没有设置最大等待时间，
+    // 但是事件自始至终只触发了一次，则真正的事件处理程序永远不会执行
     if (trailing && lastArgs) {
       return invokeFunc(time)
     }
@@ -134,6 +140,7 @@ function debounce(func, wait, options) {
       }
       if (maxing) {
         clearTimeout(timerId)
+        // Handle invocations in a tight loop.
         timerId = startTimer(wait)
         return invokeFunc(lastCallTime)
       }

@@ -48,14 +48,15 @@ function debounce(func, wait, options) {
     }
 
     var realWait = remainingWait(time)
+    // 重新启动计时器
     timerId = startTimer(realWait)
 
     // 计算真正延迟触发的时间
     function remainingWait(time) {
-      var timeSinceLastCall = time - lastCallTime,
-        timeSinceLastInvoke = time - lastInvokeTime,
-        timeWaiting = wait - timeSinceLastCall
-
+      var timeSinceLastCall = time - lastCallTime, // debounced 上次触发到现在的经历的时间
+        timeSinceLastInvoke = time - lastInvokeTime, // invokeFunc 上次触发到现在的经历的时间
+        timeWaiting = wait - timeSinceLastCall // 真正还需等待触发的时间
+      // 如果用户设置了最长等待时间，则需要取最小值
       return maxing
         ? nativeMin(timeWaiting, maxWait - timeSinceLastInvoke)
         : timeWaiting
@@ -64,14 +65,14 @@ function debounce(func, wait, options) {
 
   // 判断是否要调用 func
   function shouldInvoke(time) {
-    var timeSinceLastCall = time - lastCallTime,
-      timeSinceLastInvoke = time - lastInvokeTime
+    var timeSinceLastCall = time - lastCallTime, // debounced 上次触发到现在的经历的时间
+      timeSinceLastInvoke = time - lastInvokeTime // invokeFunc 上次触发到现在的经历的时间
 
     return (
-      lastCallTime === undefined ||
-      timeSinceLastCall >= wait ||
-      timeSinceLastCall < 0 ||
-      (maxing && timeSinceLastInvoke >= maxWait)
+      lastCallTime === undefined || // 如果是第一次调用，则一定允许
+      timeSinceLastCall >= wait || // 等待时间超过设置的时间
+      timeSinceLastCall < 0 || // 当前时刻早于上次事件触发时间，比如说调整了系统时间
+      (maxing && timeSinceLastInvoke >= maxWait) // 等待时间超过最大等待时间
     )
   }
 
