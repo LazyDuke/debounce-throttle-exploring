@@ -75,7 +75,7 @@ function debounce(func, wait) {
     lastCallTime = time
 
     if (timerId === undefined) {
-      timerId = startTimer(timeExpired, wait)
+      timerId = startTimer(wait)
     }
   }
 }

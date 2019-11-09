@@ -114,7 +114,8 @@ function debounce(func, wait, options) {
         }
       }
     }
-
+    // 负责一种case：trailing 为 true 的情况下，在前一个 wait 的 trailingEdge 已经执行了函数；
+    // 而这次函数被调用时 shouldInvoke 不满足条件，因此要设置定时器，在本次的 trailingEdge 保证函数被执行
     if (timerId === undefined) {
       timerId = startTimer(wait)
     }
